@@ -7,6 +7,7 @@ require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
 const flows = require("./flows");
+const { appendLead, appendStudent } = require("./sheets");
 
 const app = express();
 app.use(express.json());
@@ -235,6 +236,7 @@ async function handleConsultationInfo(from, input, name) {
   if (!data.service) {
     data.service = input;
     console.log("🎯 New Lead:", data);
+    await appendLead(data, from);
     await sendMessage(from, {
       type: "text",
       text: {
@@ -275,6 +277,7 @@ async function handleStudentInfo(from, input, name) {
   if (!data.course) {
     data.course = input;
     console.log("🎓 New Student Registration:", data);
+    await appendStudent(data, from);
     await sendMessage(from, {
       type: "text",
       text: {
