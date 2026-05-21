@@ -3,8 +3,10 @@
 // ============================================================
 
 const { google } = require("googleapis");
+const path = require("path");
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
+const CREDENTIALS_PATH = "/home/u293105347/google-credentials.json";
 
 const HEADERS = {
   "Consultation Leads":    ["Timestamp", "Name", "Business", "City", "Service Interest", "WhatsApp"],
@@ -12,11 +14,8 @@ const HEADERS = {
 };
 
 async function getSheets() {
-  const credentials = JSON.parse(
-    Buffer.from(process.env.GOOGLE_CREDENTIALS_B64, "base64").toString("utf8")
-  );
   const auth = new google.auth.GoogleAuth({
-    credentials,
+    keyFile: CREDENTIALS_PATH,
     scopes: ["https://www.googleapis.com/auth/spreadsheets"]
   });
   return google.sheets({ version: "v4", auth });
