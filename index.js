@@ -114,6 +114,10 @@ async function handleMessage(from, input, name) {
     return await handleConsultationInfo(from, input, name);
   }
 
+  if (sessions[from]?.state === "collecting_student_info") {
+    return await handleStudentInfo(from, input, name);
+  }
+
   const state = sessions[from]?.state || "main_menu";
 
   // Number-based navigation per state
@@ -121,6 +125,7 @@ async function handleMessage(from, input, name) {
     if (input === "1") input = "services";
     else if (input === "2") input = "packages";
     else if (input === "3") input = "consultation";
+    else if (input === "4") input = "student_reg";
   } else if (state === "services_menu") {
     if (input === "1") input = "social_media";
     else if (input === "2") input = "performance_ads";
@@ -156,6 +161,9 @@ async function handleMessage(from, input, name) {
     case "consultation":
       sessions[from].state = "collecting_info";
       return await sendMessage(from, flows.consultation());
+    case "student_reg":
+      sessions[from].state = "collecting_student_info";
+      return await sendMessage(from, flows.studentReg());
     case "social_media":
       sessions[from].state = "service_detail";
       return await sendMessage(from, flows.socialMedia());
@@ -231,6 +239,46 @@ async function handleConsultationInfo(from, input, name) {
       type: "text",
       text: {
         body: `🎉 *Thank you, ${data.fullName}!*\n\nYour consultation request has been received:\n\n👤 Name: ${data.fullName}\n🏢 Business: ${data.businessName}\n📍 City: ${data.city}\n🎯 Service: ${data.service}\n\nOur team will contact you within *24 hours* ⏰\n\n_BITSOL MARKETING — Clicks to Results_ 🚀`
+      }
+    });
+    await sendMessage(from, flows.chatEnd());
+    delete sessions[from];
+  }
+}
+
+// ──────────────────────────────────────────────────────────
+// STUDENT REGISTRATION INFO COLLECTOR
+// ──────────────────────────────────────────────────────────
+async function handleStudentInfo(from, input, name) {
+  const session = sessions[from];
+  if (!session.studentData) session.studentData = {};
+  const data = session.studentData;
+
+  if (!data.fullName) {
+    data.fullName = input;
+    return await sendMessage(from, {
+      type: "text",
+      text: { body: `✅ Got it! Now please share your *Email Address*:` }
+    });
+  }
+  if (!data.email) {
+    data.email = input;
+    return await sendMessage(from, {
+      type: "text",
+      text: { body: `✅ Great! Which *City* are you from?` }
+    });
+  }
+  if (!data.city) {
+    data.city = input;
+    return await sendMessage(from, flows.studentCourseSelect());
+  }
+  if (!data.course) {
+    data.course = input;
+    console.log("🎓 New Student Registration:", data);
+    await sendMessage(from, {
+      type: "text",
+      text: {
+        body: `🎉 *Registration Successful, ${data.fullName}!*\n\nHere are your enrollment details:\n\n👤 Name: ${data.fullName}\n📧 Email: ${data.email}\n📍 City: ${data.city}\n📚 Course: ${data.course}\n\nOur team will contact you within *24 hours* with next steps! ⏰\n\n_BITSOL MARKETING — Learn. Grow. Succeed._ 🎓`
       }
     });
     await sendMessage(from, flows.chatEnd());

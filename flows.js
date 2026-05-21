@@ -8,17 +8,22 @@ const flows = {
   mainMenu: (name) => ({
     type: "interactive",
     interactive: {
-      type: "button",
+      type: "list",
       body: {
         text: `🚀 *BITSOL MARKETING*\n\nHello ${name}! 👋 I'm *BITSOL Bot*, your Digital Growth Assistant.\n\n_Clicks to Results — Smarter Marketing_ 🚀\n\nHow may I help you today?`
       },
       footer: { text: "🔒 Your privacy is our priority." },
       action: {
-        buttons: [
-          { type: "reply", reply: { id: "services",      title: "🌐 Our Services"     } },
-          { type: "reply", reply: { id: "packages",      title: "📦 Packages"          } },
-          { type: "reply", reply: { id: "consultation",  title: "🤝 Free Consultation" } }
-        ]
+        button: "View Options",
+        sections: [{
+          title: "Main Menu",
+          rows: [
+            { id: "services",     title: "🌐 Our Services",         description: "Explore our digital marketing services" },
+            { id: "packages",     title: "📦 Packages",             description: "View our service packages & pricing"    },
+            { id: "consultation", title: "🤝 Free Consultation",    description: "Book a free strategy session"           },
+            { id: "student_reg",  title: "🎓 Student Registration", description: "Enroll in our training programs"        }
+          ]
+        }]
       }
     }
   }),
@@ -228,6 +233,35 @@ const flows = {
           { type: "reply", reply: { id: "talk_agent",   title: "📞 Talk to Agent"     } },
           { type: "reply", reply: { id: "packages",     title: "⬅ Back to Packages"  } }
         ]
+      }
+    }
+  }),
+
+  // ── STUDENT REGISTRATION ──────────────────────────────────
+  studentReg: () =>
+    `🎓 *Student Registration*\n\nWelcome! Let's get you enrolled in our digital marketing training programs 🚀\n\nPlease reply with your *Full Name* to begin:`,
+
+  studentCourseSelect: () => ({
+    type: "interactive",
+    interactive: {
+      type: "list",
+      body: {
+        text: `📚 *Select Your Course*\n\nWhich program are you interested in? Tap below to choose:`
+      },
+      footer: { text: "Certificate awarded upon completion." },
+      action: {
+        button: "Choose Course",
+        sections: [{
+          title: "Available Programs",
+          rows: [
+            { id: "Social Media Marketing",  title: "📱 Social Media",      description: "Master Instagram, TikTok & Facebook"  },
+            { id: "Performance Ads",         title: "📣 Performance Ads",   description: "Meta & Google Ads mastery"             },
+            { id: "Web Development",         title: "🖥 Web Development",    description: "React, Next.js & Node.js"              },
+            { id: "Branding & Design",       title: "🎨 Branding & Design",  description: "Logo, graphics & brand strategy"       },
+            { id: "AI Chatbots",             title: "🤖 AI Chatbots",       description: "Build WhatsApp & website bots"         },
+            { id: "Full Digital Marketing",  title: "⭐ Full Program",       description: "Complete digital marketing course"     }
+          ]
+        }]
       }
     }
   }),
