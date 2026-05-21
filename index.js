@@ -107,37 +107,81 @@ async function handleMessage(from, input, name) {
 
   if (input === "refresh") {
     delete sessions[from];
-    return await sendMessage(from, {
-      type: "text",
-      text: { body: "✅ Session cleared. Type *menu* anytime to start again." }
-    });
+    return await sendMessage(from, "✅ Session cleared. Type *menu* anytime to start again.");
+  }
+
+  if (sessions[from]?.state === "collecting_info") {
+    return await handleConsultationInfo(from, input, name);
+  }
+
+  const state = sessions[from]?.state || "main_menu";
+
+  // Number-based navigation per state
+  if (state === "main_menu") {
+    if (input === "1") input = "services";
+    else if (input === "2") input = "packages";
+    else if (input === "3") input = "consultation";
+  } else if (state === "services_menu") {
+    if (input === "1") input = "social_media";
+    else if (input === "2") input = "performance_ads";
+    else if (input === "3") input = "branding";
+    else if (input === "4") input = "web_dev";
+    else if (input === "5") input = "chatbot";
+    else if (input === "6") input = "automation";
+    else if (input === "0") input = "menu";
+  } else if (state === "packages_menu") {
+    if (input === "1") input = "pkg_starter";
+    else if (input === "2") input = "pkg_growth";
+    else if (input === "3") input = "pkg_scale";
+    else if (input === "0") input = "menu";
+  } else if (state === "service_detail") {
+    if (input === "1") input = "packages";
+    else if (input === "2") input = "talk_agent";
+    else if (input === "3") input = "services";
+    else if (input === "0") input = "menu";
+  } else if (state === "package_detail") {
+    if (input === "1") input = "consultation";
+    else if (input === "2") input = "talk_agent";
+    else if (input === "3") input = "packages";
+    else if (input === "0") input = "menu";
   }
 
   switch (input) {
     case "services":
+      sessions[from].state = "services_menu";
       return await sendMessage(from, flows.servicesMenu());
     case "packages":
+      sessions[from].state = "packages_menu";
       return await sendMessage(from, flows.packagesMenu());
     case "consultation":
       sessions[from].state = "collecting_info";
       return await sendMessage(from, flows.consultation());
     case "social_media":
+      sessions[from].state = "service_detail";
       return await sendMessage(from, flows.socialMedia());
     case "performance_ads":
+      sessions[from].state = "service_detail";
       return await sendMessage(from, flows.performanceAds());
     case "branding":
+      sessions[from].state = "service_detail";
       return await sendMessage(from, flows.branding());
     case "web_dev":
+      sessions[from].state = "service_detail";
       return await sendMessage(from, flows.webDev());
     case "chatbot":
+      sessions[from].state = "service_detail";
       return await sendMessage(from, flows.chatbot());
     case "automation":
+      sessions[from].state = "service_detail";
       return await sendMessage(from, flows.automation());
     case "pkg_starter":
+      sessions[from].state = "package_detail";
       return await sendMessage(from, flows.pkgStarter());
     case "pkg_growth":
+      sessions[from].state = "package_detail";
       return await sendMessage(from, flows.pkgGrowth());
     case "pkg_scale":
+      sessions[from].state = "package_detail";
       return await sendMessage(from, flows.pkgScale());
     case "talk_agent":
       await sendMessage(from, flows.talkAgent());
@@ -145,12 +189,9 @@ async function handleMessage(from, input, name) {
       delete sessions[from];
       return;
     default:
-      if (sessions[from]?.state === "collecting_info") {
-        await handleConsultationInfo(from, input, name);
-      } else {
-        await sendMessage(from, flows.invalidResponse());
-        await sendMessage(from, flows.mainMenu(name));
-      }
+      await sendMessage(from, flows.invalidResponse());
+      await sendMessage(from, flows.mainMenu(name));
+      sessions[from].state = "main_menu";
   }
 }
 
@@ -202,6 +243,9 @@ async function handleConsultationInfo(from, input, name) {
 // ──────────────────────────────────────────────────────────
 async function sendMessage(to, messageData) {
   try {
+    if (typeof messageData === "string") {
+      messageData = { type: "text", text: { body: messageData } };
+    }
     const payload = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
