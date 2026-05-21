@@ -3,7 +3,6 @@
 // ============================================================
 
 const { google } = require("googleapis");
-const path = require("path");
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 
@@ -13,8 +12,11 @@ const HEADERS = {
 };
 
 async function getSheets() {
+  const credentials = JSON.parse(
+    Buffer.from(process.env.GOOGLE_CREDENTIALS_B64, "base64").toString("utf8")
+  );
   const auth = new google.auth.GoogleAuth({
-    keyFile: path.join(__dirname, "credentials.json"),
+    credentials,
     scopes: ["https://www.googleapis.com/auth/spreadsheets"]
   });
   return google.sheets({ version: "v4", auth });
